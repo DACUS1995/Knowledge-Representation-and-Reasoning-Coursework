@@ -1,0 +1,39 @@
+{
+    "W0": {
+        "Destination": ["W1", "W2", "W3"],
+        "Values": {
+            "D": true,
+            "W": true
+        }
+    },
+    "W1": {
+        "Destination": [],
+        "Values": {
+            "D": true,
+            "W": true,
+            "C": false,
+            "F": true,
+            "B": true
+        }
+    },
+    "W2": {
+        "Destination": [],
+        "Values": {
+            "D": true,
+            "W": true,
+            "F": false,
+            "C": true,
+            "B": true
+        }
+    },
+    "W3": {
+        "Destination": [],
+        "Values": {
+            "D": true,
+            "W": true,
+            "C": false,
+            "F": false,
+            "B": true
+        }
+    }
+}
