@@ -2,53 +2,69 @@
 
 class Evaluator
 {
-    constructor()
-    {
-    }
+	constructor()
+	{
+	}
 
-    /**
-     * @param {Object} objInputObject
-     */
-    static evaluate(objInputObject)
-    {
-        const arrQueries = objInputObject.queries;
-        const arrResults = [];
+	/**
+	 * @param {Object} objInputObject
+	 */
+	static evaluate(objInputObject)
+	{
+		const objCliqueGraph = Evaluator.buildCliqueTree(objInputObject);
+	}
 
-        for(let index in arrQueries)
-        {
-            const query = arrQueries[index];
-            const arrZ = query.Z;
+	static buildCliqueTree(objInputObject)
+	{
+		objInputObject = JSON.parse(JSON.stringify(objInputObject));
+		const objGraph = Evaluator.DirectToUndirect(objInputObject.graph);
 
-            let arrParents = [];
+		// Step 1 - Moralize the graph
+		for(const strNode of objInputObject)
+		{
+			const arrParents = objInputObject.nodes[strNode].parents;
 
-            const objCopyInput = JSON.parse(JSON.stringify(objInputObject));
+			for(const strFirstParent of arrParents)
+			{
+				for(const strSecondParent of arrParents)
+				{
+					if(strFirstParent === strSecondParent)
+					{
+						continue;
+					}
+					else
+					{
+						if(!objGraph[strFirstParent].includes(strSecondParent))
+						{
+							objGraph[strFirstParent].push(strSecondParent);
+						}
 
- 
-            // console.log("----------------------------------");
-            // console.log(JSON.stringify(objCopyInput.graph, null, 4));
-            // console.log("----------------------------------\n");
+						if(!objGraph[strSecondParent].includes(strFirstParent))
+						{
+							objGraph[strSecondParent].push(strFirstParent)
+						}
+					}
+				}
+			}
+		}
 
+		// Step 2 - Triangulate
+		
 
-            
-            console.log("---------------------");
-            console.log(objCopyInput.graph);
-            console.log("---------------------");
-        }
-        console.log(arrResults);
-    }
+		// Step 3 - Create Clique Graph
 
-    
-    static mapParents(objParentNodes, arrParents, Z)
-    {
-        if(objParentNodes[Z].length != 0)
-        {
-            arrParents = objParentNodes[Z].reduce((acc, val) => {
-                return [...acc, Evaluator.mapParents(objParentNodes, [], val)]
-            }, objParentNodes[Z]);
-        }
+		// Step 4 - Create Clique Tree (Min weight span tree)
+	}
 
-        return arrParents;
-    }
+	static runBeliefPropagation()
+	{
+		throw new Error("Must be implemented");
+	}
+
+	static DirectToUndirect(objGraph)
+	{
+		throw new Error("Must be implemented");
+	}
 }
 
 module.exports = Evaluator;
