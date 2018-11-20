@@ -14,7 +14,7 @@ class Main
 		const strFileName = process.argv[2] || "input.txt";
 		
 		const objInputObject = await Parser.loadAndParse(strFileName);
-		// Evaluator.evaluate(objInputObject);
+		Evaluator.evaluate(objInputObject);
 	}
 }
 

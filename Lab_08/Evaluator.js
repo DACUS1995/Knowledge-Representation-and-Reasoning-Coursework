@@ -1,5 +1,7 @@
 //@ts-check
 
+const Utils = require("./Utils");
+
 class Evaluator
 {
 	constructor()
@@ -20,7 +22,7 @@ class Evaluator
 		const objGraph = Evaluator.DirectToUndirect(objInputObject.graph);
 
 		// Step 1 - Moralize the graph
-		for(const strNode of objInputObject)
+		for(const strNode of Object.keys(objInputObject.nodes))
 		{
 			const arrParents = objInputObject.nodes[strNode].parents;
 
@@ -47,6 +49,8 @@ class Evaluator
 				}
 			}
 		}
+		Utils.printObject(objGraph);
+
 
 		// Step 2 - Triangulate
 		
@@ -63,7 +67,34 @@ class Evaluator
 
 	static DirectToUndirect(objGraph)
 	{
-		throw new Error("Must be implemented");
+		const objNewGraph = {};
+
+		for(const strNode of Object.keys(objGraph))
+		{
+			if(strNode in objNewGraph)
+			{
+				objNewGraph[strNode] = new Set([...objGraph[strNode], ...objNewGraph[strNode]]);
+			}
+			else
+			{
+				objNewGraph[strNode] = new Set(objGraph[strNode]);
+			}
+
+			for(const strChild of objNewGraph[strNode])
+			{
+				if(!(strChild in objNewGraph))
+				{
+					objNewGraph[strChild] = new Set();
+				}
+				objNewGraph[strChild].add(strNode);
+			}
+		}
+
+		Object.keys(objNewGraph).map((strNode => {
+			objNewGraph[strNode] = [...objNewGraph[strNode]];
+		}));
+
+		return objNewGraph;
 	}
 }
 

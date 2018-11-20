@@ -1,6 +1,7 @@
 // @ts-check
 
 const FileLoader = require("./FileLoader");
+const Utils = require("./Utils");
 
 class Parser
 {
@@ -51,10 +52,7 @@ class Parser
 			})
 		}
 
-		console.log("----------------------------------");
-		console.log(JSON.stringify(objInputObject, null, 4));
-		console.log("----------------------------------\n");
-
+		// Utils.printObject(objInputObject);
 		return objInputObject;
 	}
 
