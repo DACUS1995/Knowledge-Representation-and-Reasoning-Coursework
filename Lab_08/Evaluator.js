@@ -53,9 +53,61 @@ class Evaluator
 
 
 		// Step 2 - Triangulate
-		
+		const arrNodes = Object.keys(objGraph);
+		const objScore = {};
 
-		// Step 3 - Create Clique Graph
+		// Sort the nodes by number of edges that need to te be added due to its elimination
+		for(const strNode of arrNodes)
+		{
+			let nCounter = 0;
+			const arrNeighbours = objGraph[strNode];
+
+			for(let i = 0; i < arrNeighbours.length - 1; i++)
+			{
+				for(let j = i + 1; j < arrNeighbours.length; j++)
+				{
+					if(!objGraph[arrNeighbours[i]].includes(arrNeighbours[j]))
+					{
+						nCounter++;
+					}
+				}
+			}
+
+			objScore[strNode] = nCounter;
+		}
+
+		arrNodes.sort((strNodeA, strNodeB) => {
+			return objScore[strNodeA] - objScore[strNodeB];
+		});
+
+
+		const arrMarked = [];
+		const objNewGraph = Utils.copyObject(objGraph);
+		for(let strNode of arrNodes)
+		{
+			const arrNeighbours = objGraph[strNode];
+			console.log(arrMarked);
+
+			for(let i = 0; i < arrNeighbours.length - 1; i++)
+			{
+				for(let j = i + 1; j < arrNeighbours.length; j++)
+				{
+					if(
+						!objNewGraph[arrNeighbours[i]].includes(arrNeighbours[j]) 
+						&& !arrMarked.includes(arrNeighbours[i])
+						&& !arrMarked.includes(arrNeighbours[j])
+					)
+					{
+						objNewGraph[arrNeighbours[i]].push(arrNeighbours[j]);
+						objNewGraph[arrNeighbours[j]].push(arrNeighbours[i]);
+					}
+				}
+			}
+
+			arrMarked.push(strNode);
+		}
+
+		// Step 3 - Create Maximal Clique Graph (Bron Kerbosch)
 
 		// Step 4 - Create Clique Tree (Min weight span tree)
 	}
