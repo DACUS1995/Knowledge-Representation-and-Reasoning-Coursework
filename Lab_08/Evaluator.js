@@ -1,6 +1,7 @@
 //@ts-check
 
 const Utils = require("./Utils");
+const Sets = require("./Sets");
 
 class Evaluator
 {
@@ -86,7 +87,7 @@ class Evaluator
 		for(let strNode of arrNodes)
 		{
 			const arrNeighbours = objGraph[strNode];
-			console.log(arrMarked);
+			// console.log(arrMarked);
 
 			for(let i = 0; i < arrNeighbours.length - 1; i++)
 			{
@@ -108,6 +109,15 @@ class Evaluator
 		}
 
 		// Step 3 - Create Maximal Clique Graph (Bron Kerbosch)
+		const arrCliques = [];
+		Evaluator.BronKerbosch(
+			/*R*/ new Set(), 
+			/*P*/ new Set(Object.keys(objNewGraph)), 
+			/*X*/ new Set(), 
+			arrCliques,
+			objNewGraph
+		);
+		console.log(arrCliques);
 
 		// Step 4 - Create Clique Tree (Min weight span tree)
 	}
@@ -147,6 +157,32 @@ class Evaluator
 		}));
 
 		return objNewGraph;
+	}
+
+	static BronKerbosch(R, P, X, arrCliques, objGraph)
+	{
+		[R, P, X] = Sets.checkSet(R, P, X);
+
+		if(P.size === 0 && X.size === 0)
+		{
+			console.log(":: Clique found");
+			console.log(R);
+			arrCliques.push(R);
+		}
+
+		for(let strNode of P)
+		{
+			Evaluator.BronKerbosch(
+				/*R*/ Sets.union(R, strNode),
+				/*P*/ Sets.intersection(P, objGraph[strNode]),
+				/*X*/ Sets.intersection(X, objGraph[strNode]),
+				arrCliques,
+				objGraph
+			)
+
+			P = Sets.difference(P, strNode);
+			X = Sets.union(X, strNode);
+		}
 	}
 }
 
