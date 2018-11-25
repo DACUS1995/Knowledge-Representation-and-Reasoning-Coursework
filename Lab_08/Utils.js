@@ -10,11 +10,15 @@ class Utils
         return JSON.parse(JSON.stringify(objObject));
     }
 
-    static printObject(objInputObject, bPretty = false)
+    static printObject(objInputObject, bPretty = false, strMessage)
     {
+        console.log("----------------------------------");
+        console.log(`### ${strMessage} ###`);
         if(!bPretty)
         {
+            console.log("----------------------------------");
             console.log(objInputObject);
+            console.log("----------------------------------\n");
         }
         else
         {

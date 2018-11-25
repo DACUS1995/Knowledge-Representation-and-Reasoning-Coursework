@@ -2,6 +2,7 @@
 
 const Utils = require("./Utils");
 const Sets = require("./Sets");
+const KruskalMST = require("./KruskalMST");
 
 class Evaluator
 {
@@ -157,7 +158,6 @@ class Evaluator
 		for(let nIndex = 0; nIndex < arrVertexMap.length; nIndex++)
 		{
 			const setCurrentClique = arrVertexMap[nIndex];
-			console.log(nIndex);
 
 			for(let i = nIndex + 1; i <= arrVertexMap.length; i++)
 			{
@@ -166,12 +166,14 @@ class Evaluator
 				if(setCommon.size !== 0)
 				{
 					arrCliqueGraph[nIndex].push({
+						"src": nIndex,
 						"dest": i,
 						"weight": setCommon.size,
 						"common": [...setCommon]
 					});
 
 					arrCliqueGraph[i].push({
+						"src": i,
 						"dest": nIndex,
 						"weight": setCommon.size,
 						"common": [...setCommon]
@@ -184,8 +186,10 @@ class Evaluator
 			}
 		}
 
-		// Step 4 - Create Clique Tree (Min weight span tree)
-
+		// Step 4 - Create Clique Tree (Max weight span tree - Kruskal)
+		const Kruskal = new KruskalMST(arrCliqueGraph);
+		const arrResult = Kruskal.run();
+		Utils.printObject(arrResult, false, "Max Spanning tree");
 	}
 
 	static runBeliefPropagation()
