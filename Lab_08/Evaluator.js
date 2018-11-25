@@ -64,6 +64,7 @@ class Evaluator
 		{
 			const objScore = {};
 
+			// First count the number of edges that have to be added when removing a node
 			for(const strInnerNode of arrNodes)
 			{
 				if(arrMarked.includes(strInnerNode))
@@ -137,7 +138,6 @@ class Evaluator
 
 		// Step 3 - Create Maximal Clique Graph (Bron Kerbosch)
 		const arrCliques = [];
-		// console.log(objNewGraph);
 		Evaluator.BronKerbosch(
 			/*R*/ new Set(), 
 			/*P*/ new Set(Object.keys(objNewGraph)), 
@@ -145,9 +145,47 @@ class Evaluator
 			arrCliques,
 			objNewGraph
 		);
-		console.log(arrCliques);
+		// console.log(arrCliques);
+		
+		const arrVertexMap = arrCliques;
+		let arrCliqueGraph = Array.from(new Array(arrVertexMap.length));
+		arrCliqueGraph = arrCliqueGraph.map((elem) => {
+			return [];
+		});
+
+		// Create the actual graph of cliques
+		for(let nIndex = 0; nIndex < arrVertexMap.length; nIndex++)
+		{
+			const setCurrentClique = arrVertexMap[nIndex];
+			console.log(nIndex);
+
+			for(let i = nIndex + 1; i <= arrVertexMap.length; i++)
+			{
+				const setCommon = Sets.intersection(setCurrentClique, arrVertexMap[i]);
+
+				if(setCommon.size !== 0)
+				{
+					arrCliqueGraph[nIndex].push({
+						"dest": i,
+						"weight": setCommon.size,
+						"common": [...setCommon]
+					});
+
+					arrCliqueGraph[i].push({
+						"dest": nIndex,
+						"weight": setCommon.size,
+						"common": [...setCommon]
+					});
+				}
+				else
+				{
+					continue;
+				}
+			}
+		}
 
 		// Step 4 - Create Clique Tree (Min weight span tree)
+
 	}
 
 	static runBeliefPropagation()
