@@ -55,39 +55,66 @@ class Evaluator
 
 		// Step 2 - Triangulate
 		const arrNodes = Object.keys(objGraph);
-		const objScore = {};
-
-		// Sort the nodes by number of edges that need to te be added due to its elimination
-		for(const strNode of arrNodes)
-		{
-			let nCounter = 0;
-			const arrNeighbours = objGraph[strNode];
-
-			for(let i = 0; i < arrNeighbours.length - 1; i++)
-			{
-				for(let j = i + 1; j < arrNeighbours.length; j++)
-				{
-					if(!objGraph[arrNeighbours[i]].includes(arrNeighbours[j]))
-					{
-						nCounter++;
-					}
-				}
-			}
-
-			objScore[strNode] = nCounter;
-		}
-
-		arrNodes.sort((strNodeA, strNodeB) => {
-			return objScore[strNodeA] - objScore[strNodeB];
-		});
-
+		console.log(arrNodes);
 
 		const arrMarked = [];
 		const objNewGraph = Utils.copyObject(objGraph);
-		for(let strNode of arrNodes)
+
+		for(let nIndex in arrNodes)
 		{
+			const objScore = {};
+
+			for(const strInnerNode of arrNodes)
+			{
+				if(arrMarked.includes(strInnerNode))
+				{
+					continue;
+				}
+
+				let nCounter = 0;
+				const arrNeighbours = objGraph[strInnerNode];
+	
+				for(let i = 0; i < arrNeighbours.length - 1; i++)
+				{
+					// Make sure we dont count the eliminated nodes
+					if(arrMarked.includes(arrNeighbours[i]))
+					{
+						continue;
+					}
+	
+					for(let j = i + 1; j < arrNeighbours.length; j++)
+					{
+						if(arrMarked.includes(arrNeighbours[j]))
+						{
+							continue;
+						}
+	
+						if(!objGraph[arrNeighbours[i]].includes(arrNeighbours[j]))
+						{
+							nCounter++;
+						}
+					}
+				}
+	
+				objScore[strInnerNode] = nCounter;
+			}
+
+			const arrSortedNodes = Object.keys(objScore);
+			arrSortedNodes.sort((strNodeA, strNodeB) => {
+				if(objScore[strNodeA] - objScore[strNodeB] !== 0)
+				{
+					return objScore[strNodeA] - objScore[strNodeB];
+				}
+				else
+				{
+					return objGraph[strNodeA].length - objGraph[strNodeB].length;
+				}
+			});
+
+
+			// Select the node with the smallest score to process
+			const strNode = arrSortedNodes[0];
 			const arrNeighbours = objGraph[strNode];
-			// console.log(arrMarked);
 
 			for(let i = 0; i < arrNeighbours.length - 1; i++)
 			{
@@ -110,6 +137,7 @@ class Evaluator
 
 		// Step 3 - Create Maximal Clique Graph (Bron Kerbosch)
 		const arrCliques = [];
+		// console.log(objNewGraph);
 		Evaluator.BronKerbosch(
 			/*R*/ new Set(), 
 			/*P*/ new Set(Object.keys(objNewGraph)), 
