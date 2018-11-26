@@ -15,7 +15,8 @@ class Evaluator
 	 */
 	static evaluate(objInputObject)
 	{
-		const objCliqueGraph = Evaluator.buildCliqueTree(objInputObject);
+		const arrCliqueTree = Evaluator.buildCliqueTree(objInputObject);
+		Evaluator.runBeliefPropagation(arrCliqueTree, objInputObject);
 	}
 
 	static buildCliqueTree(objInputObject)
@@ -192,11 +193,13 @@ class Evaluator
 		Utils.printObject(arrResult, false, "Max Spanning tree");
 	}
 
-	static runBeliefPropagation()
+	static runBeliefPropagation(arrCliqueTree, objInputObject)
 	{
 		throw new Error("Must be implemented");
 	}
 
+
+	
 	static DirectToUndirect(objGraph)
 	{
 		const objNewGraph = {};
