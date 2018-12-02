@@ -3,6 +3,7 @@
 const Utils = require("./Utils");
 const Sets = require("./Sets");
 const KruskalMST = require("./KruskalMST");
+const BeliefPropagation = require("./BeliefPropagation");
 
 class Evaluator
 {
@@ -15,8 +16,8 @@ class Evaluator
 	 */
 	static evaluate(objInputObject)
 	{
-		const arrCliqueTree = Evaluator.buildCliqueTree(objInputObject);
-		Evaluator.runBeliefPropagation(arrCliqueTree, objInputObject);
+		const [arrCliqueTree, arrCliques] = Evaluator.buildCliqueTree(objInputObject);
+		Evaluator.runBeliefPropagation(arrCliqueTree, objInputObject, arrCliques);
 	}
 
 	static buildCliqueTree(objInputObject)
@@ -139,7 +140,7 @@ class Evaluator
 		}
 
 		// Step 3 - Create Maximal Clique Graph (Bron Kerbosch)
-		const arrCliques = [];
+		let arrCliques = [];
 		Evaluator.BronKerbosch(
 			/*R*/ new Set(), 
 			/*P*/ new Set(Object.keys(objNewGraph)), 
@@ -150,6 +151,10 @@ class Evaluator
 		// console.log(arrCliques);
 		
 		const arrVertexMap = arrCliques;
+		arrCliques = arrCliques.map((el) => {
+			return [...el];
+		})
+
 		let arrCliqueGraph = Array.from(new Array(arrVertexMap.length));
 		arrCliqueGraph = arrCliqueGraph.map((elem) => {
 			return [];
@@ -191,11 +196,14 @@ class Evaluator
 		const Kruskal = new KruskalMST(arrCliqueGraph);
 		const arrResult = Kruskal.run();
 		Utils.printObject(arrResult, false, "Max Spanning tree");
+
+		return [arrResult, arrCliques];
 	}
 
-	static runBeliefPropagation(arrCliqueTree, objInputObject)
+	static runBeliefPropagation(arrCliqueTree, objInputObject, arrCliques)
 	{
-		throw new Error("Must be implemented");
+		const objBP = new BeliefPropagation(arrCliqueTree, objInputObject, arrCliques);
+		objBP.runSteps();
 	}
 
 
