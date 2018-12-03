@@ -11,7 +11,8 @@ class Factor
 		this._arrProbs = arrProbs;
 		this._arrValues = arrValues;
 
-		this._arrInnerValues = Factor.generateCombinations(Math.sqrt(this._nSize));
+		const nCombinationSize = this._nSize == 2 ? 1 : Math.sqrt(this._nSize);
+		this._arrInnerValues = nCombinationSize == 1 ? [Factor.generateCombinations(nCombinationSize)] : Factor.generateCombinations(nCombinationSize);
 	}
 
 	multiply(secondFactor)
@@ -34,6 +35,7 @@ class Factor
 			arrProbs.push(1);
 		}
 
+
 		for(let i = 0; i < arrCombinations.length; i++)
 		{
 			for(let j = 0; j < this._arrInnerValues.length; j++)
@@ -49,17 +51,17 @@ class Factor
 
 				if(bTruth)
 				{
-					arrProbs[i] *= this._arrInnerValues._arrProbs[j];
+					arrProbs[i] *= this._arrProbs[j];
 				}
 			}
 			
-			const nOffset = setIntersection.size;
-			for(let j = 0; secondFactor._arrInnerValues.length; j++)
+			const nOffset =  this._arrInnerValues.length - setIntersection.size;
+			for(let j = 0; j < secondFactor._arrInnerValues.length; j++)
 			{
 				let bTruth = true;
-				for(let k = 0; k < this._arrValues.length; k++)
+				for(let k = 0; k < secondFactor._arrValues.length; k++)
 				{
-					if(arrCombinations[i][k + nOffset] !== this._arrInnerValues[j][k])
+					if(arrCombinations[i][k + nOffset] !== secondFactor._arrInnerValues[j][k])
 					{
 						bTruth = false;
 					}
@@ -67,12 +69,13 @@ class Factor
 
 				if(bTruth)
 				{
-					arrProbs[i] *= this._arrInnerValues._arrProbs[j];
+					arrProbs[i] *= secondFactor._arrProbs[j];
 				}
 			}
 		}
 
 		const newFactor = new Factor(Math.pow(2, setUnion.size), arrProbs, [...setUnion]);
+		return newFactor;
 	}
 
 	static generateCombinations(nVariables)
