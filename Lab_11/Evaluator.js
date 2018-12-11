@@ -15,37 +15,46 @@ class Evaluator
 	static evaluate(objSamples, objInputObject)
 	{
 		const objInput = objInputObject.objInputObject;
+		const objRealNet = objInput.nodes;
 		const arrQueries = objInputObject.arrQueries;
 		
 		const objParams = Evaluator.initializeParams(objInput.nodes);
 		// console.log(objParams);
-		Evaluator.fit(objSamples.variables, objSamples.samples, objParams)
+		Evaluator.fit(objSamples.variables, objSamples.samples, objParams, objRealNet)
 
 		Utils.printObject(objParams, false, "RESULTS");
 	}
 
-	static fit(arrVariables, arrSamples, objParams)
+	static fit(arrVariables, arrSamples, objParams, objRealNet)
 	{
-		// for(let nIndex = 0; nIndex < 10; nIndex++)
-		for(let nIndex = 0; nIndex < arrSamples["A"].length; nIndex++)
+		for(let i = 0; i < Evaluator.epochs; i++)
 		{
-			console.log(`Sample [${nIndex}]`);
-			for(let strVariable of arrVariables)
+			for(let nIndex = 0; nIndex < arrSamples["A"].length; nIndex++)
 			{
-				const arrParents = objParams[strVariable].parents;
-				const arrParentsValue = [];
-
-				for(let strParent of arrParents)
+				for(let strVariable of arrVariables)
 				{
-					arrParentsValue.push(arrSamples[strParent][nIndex]);
+					const arrParents = objParams[strVariable].parents;
+					const arrParentsValue = [];
+	
+					for(let strParent of arrParents)
+					{
+						arrParentsValue.push(arrSamples[strParent][nIndex]);
+					}
+	
+					const nCPDpos = Utils.binArrToDec(arrParentsValue);
+					const theta = objParams[strVariable].CPD[nCPDpos];
+					const nGradient = arrSamples[strVariable][nIndex] - Utils.sigmoid(theta)
+	
+					objParams[strVariable].CPD[nCPDpos] = theta + Evaluator.learningRate * nGradient;
 				}
-
-				const nCPDpos = Utils.binArrToDec(arrParentsValue);
-				const theta = objParams[strVariable].CPD[nCPDpos];
-				const nGradient = arrSamples[strVariable][nIndex] - Utils.sigmoid(theta)
-
-				objParams[strVariable].CPD[nCPDpos] = Evaluator.round(theta + Evaluator.learningRate * nGradient);
 			}
+			
+			for(let variable in objParams)
+			{
+				objParams[variable].CPD = objParams[variable].CPD.map(el => Utils.sigmoid(el));
+			}
+
+			console.log(`Epoch [${i}]`);
 		}
 	}
 
@@ -69,7 +78,8 @@ class Evaluator
 		return Math.round(number * 1000) / 1000;
 	}
 
-	static get learningRate(){return 0.003}
+	static get learningRate(){return 0.005}
+	static get epochs(){return 100}
 }
 
 

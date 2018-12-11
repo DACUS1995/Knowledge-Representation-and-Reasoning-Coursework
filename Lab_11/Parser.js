@@ -34,7 +34,7 @@ class Parser
 			objInputObject.nodes[strVariable].parents = arrParents;
 
 			// CPD Parsing
-			const arrCPDs = arrComponents[2].trim().split(" ");
+			const arrCPDs = arrComponents[2].trim().split(" ").map(el => parseFloat(el));
 			objInputObject.nodes[strVariable].CPD = arrCPDs;
 
 			// Creating the graph

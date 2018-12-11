@@ -61,6 +61,8 @@ class Utils
 			throw new Error("Input probability distributions have different sizes.");
 		}
 
+		distA = distA.map(el => el < 0 ? 0.000000001 : el);
+		distB = distB.map(el => el < 0 ? 0.000000001 : el);
 		let nCrossEntropyResult = 0;
 
 		for(let nIndex = 0; nIndex < distA.length; nIndex++)
