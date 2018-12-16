@@ -298,10 +298,7 @@ def forward(grid, observations):
                 alpha[t][state] = sum
     # TODO 3 ends here
 
-    # print(alpha[-1, ])
-    # print(np.sum(alpha))
     p = np.sum(alpha[-1])
-    # p = sum(alpha[-1,])
     return p, alpha
 
 # See the forward algorithm in action
@@ -323,21 +320,21 @@ print("Most probably the sequence was generated from " + best_grid + ".")
 
 
 # See how sequence length influences p
-# RUNS_NO = 1000
+RUNS_NO = 1000
 
-# for T in range(1, 11):
-#     correct = 0
-#     for _ in range(RUNS_NO):
-#         true_grid = np.random.choice(GRIDS)
-#         observations, _ = get_sequence(true_grid, T)
-#         best_grid, best_p = None, None
-#         for grid in GRIDS:
-#             p, _ = forward(grid, observations)
-#             if best_grid is None or best_p < p:
-#                 best_grid, best_p = grid.name, p
-#         correct += (best_grid == true_grid.name)
-#     perc = float(correct * 100) / RUNS_NO
-#     print("%5d / %d (%5.2f%%) for T = %2d" % (correct, RUNS_NO, perc, T))
+for T in range(1, 11):
+    correct = 0
+    for _ in range(RUNS_NO):
+        true_grid = np.random.choice(GRIDS)
+        observations, _ = get_sequence(true_grid, T)
+        best_grid, best_p = None, None
+        for grid in GRIDS:
+            p, _ = forward(grid, observations)
+            if best_grid is None or best_p < p:
+                best_grid, best_p = grid.name, p
+        correct += (best_grid == true_grid.name)
+    perc = float(correct * 100) / RUNS_NO
+    print("%5d / %d (%5.2f%%) for T = %2d" % (correct, RUNS_NO, perc, T))
 
 # Test alpha_values
 _test_observations = [2, 2, 3]
@@ -356,8 +353,6 @@ _test_values = np.array([
     2.44994792e-03, 6.72352431e-05, 2.82595486e-05, 6.42361111e-07]])
 
 p, alpha = forward(grid1, [2, 2, 3])
-print(alpha)
-print(_test_values)
 assert alpha.shape == (3, grid1.states_no), "Bad shape!"
 assert np.allclose(alpha, _test_values), "Bad values!"
 assert np.allclose(p, sum(_test_values[2])), "Bad values!"
@@ -381,8 +376,16 @@ def viterbi(grid, observations):
     B = get_emission_probabilities(grid)
     # 
     
-    # Task 4 ends here.
+    for obs in range(len(observations)):
+        for state in range(N):
+            if obs == 0:
+                delta[obs][state] = pi[state] * B[state][observations[obs]]
+            else:
+                max_prev_state = np.argmax(delta[obs-1])
+                delta[obs][state] = delta[obs-1][max_prev_state] * A[max_prev_state][state] * B[state][observations[obs]]
+        states[obs] = np.argmax(delta[obs])
 
+    # Task 4 ends here.
     return [(s // W, s % W) for s in states], delta
 
 # Decoding a state
@@ -449,6 +452,7 @@ _test_values = [[5.31250000e-02, 3.12500000e-03, 3.12500000e-03, 3.12500000e-03,
                  5.17968750e-07, 2.37070312e-06, 4.34837963e-07, 1.44148785e-04,
                  7.63140625e-05, 5.54418403e-06, 2.20547641e-02, 5.65289352e-06]]
 states, delta = viterbi(grid2, [0, 0, 1, 3])
+print(states)
 assert len(states) == len(_test_states)
 assert all([s_i == s_j for (s_i, s_j) in zip(states, _test_states)])
 assert np.allclose(delta, _test_values)
