@@ -394,7 +394,7 @@ def viterbi(grid, observations):
     prev_index = states[-1]
 
     for m in np.arange(1,T)[::-1]:
-        print(states)
+        # print(states)
         prev_index = back[m, prev_index]
         states[m-1] = prev_index
 
