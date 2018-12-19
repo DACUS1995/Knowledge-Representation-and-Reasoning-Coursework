@@ -368,6 +368,10 @@ def viterbi(grid, observations):
     T = len(observations)
     delta = np.zeros((T, N))
     states = np.zeros((T), dtype=int)
+
+    path = np.empty((T))
+    back = np.zeros((T, N), dtype=int)
+
     
     # Task 4: Implement the Viterbi algorithm.
     # Hint: use functions from tasks 1 and 2.
@@ -381,9 +385,18 @@ def viterbi(grid, observations):
             if obs == 0:
                 delta[obs][state] = pi[state] * B[state][observations[obs]]
             else:
-                max_prev_state = np.argmax(delta[obs-1])
-                delta[obs][state] = delta[obs-1][max_prev_state] * A[max_prev_state][state] * B[state][observations[obs]]
-        states[obs] = np.argmax(delta[obs])
+                # max_prev_state = np.argmax(delta[obs-1])
+                delta[obs][state] = np.max([delta[obs-1][prev] * A[prev][state] * B[state][observations[obs]] for prev in range(N)])
+                back[obs][state] = np.argmax([delta[obs-1][prev] * A[prev][state] for prev in range(N)])
+        # states[obs] = np.argmax(delta[obs])
+
+    states[len(observations) - 1] = np.argmax([delta[T - 1][state] for state in range(N)])
+    prev_index = states[-1]
+
+    for m in np.arange(1,T)[::-1]:
+        print(states)
+        prev_index = back[m, prev_index]
+        states[m-1] = prev_index
 
     # Task 4 ends here.
     return [(s // W, s % W) for s in states], delta
