@@ -164,10 +164,10 @@ if ACTIVE_TESTS == True:
 
 
 # ### Emission probability matrix
-def get_emission_probabilities(grid):
+def get_emission_probabilities(grid, num_possible_obs=len(COLORS)):
 	H, W = grid.shape
 	N = grid.states_no
-	B = np.zeros((H * W, len(COLORS)))
+	B = np.zeros((H * W, num_possible_obs))
 	
 	# Task 2: Compute the emission probabilities matrix.
 	# Hint: Use method `get_colors`.
@@ -328,11 +328,12 @@ def backward_(grid, observations, A, B):
 	T = len(observations)
 	beta = np.zeros((T, N))
 
-	
-	for t in range(T):
+	beta[T - 1, :] = 1
+
+	for t in range(T - 1, -1, -1):
 		for state in range(N):
-			if t == 0:
-				beta[t][state] = 1
+			if t == T - 1:
+				pass
 			else:
 				sum = 0
 				for prev_state in range(N):
@@ -467,9 +468,7 @@ def learn(grid, observations, num_possible_obs, eps):
 
 	while it < 100: #abs(logP - oldP) >= eps:
 
-		print("\n\n", pi,"\n",get_initial_distribution(grid), "\n")
-		import time
-		time.sleep(0.2)
+		# print("\n\n", pi,"\n",get_initial_distribution(grid), "\n")
 
 		it += 1
 		print(f"Iter {it}, diff = {abs(logP - oldP)}")
@@ -482,25 +481,23 @@ def learn(grid, observations, num_possible_obs, eps):
 		beta = backward_(grid, observations, A, B)
 
 
-		# get gamma
+		# GAMMA
 		for t in range(T):
 			denom[t] = np.sum(alpha[t, :] * beta[t, :])
+			# print(alpha[t, :])
+			# print(beta[t, :])
+			# print(t)
+			# print(denom[t])
+			# exit()
 			for i in range(N):
 				gamma[t, i] = alpha[t, i] * beta[t, i] / denom[t]
+		# print(denom)
 
-		# get xi
+		# XI
 		for t in range(T - 1):
-
-			assert np.allclose(denom[t], np.sum(alpha[t, :] * np.transpose(A) * B[:, observations[t+1]] * beta[t+1, :]))
-
 			for i in range(N):
-				for j in range(N):  # TODO -check Aij Aji
+				for j in range(N):
 					xi[t, i, j] = alpha[t, i] * A[j, i] * B[j, observations[t + 1]] * beta[t + 1, j] / denom[t]
-		# ---
-
-		# M step
-		# update pi
-		pi = gamma[0, :]
 
 		# update A
 		for i in range(N):
@@ -511,11 +508,13 @@ def learn(grid, observations, num_possible_obs, eps):
 		for i in range(N):
 			for k in range(M):
 				B[i, k] = np.sum((observations == k) * gamma[:, i]) / np.sum(gamma[:, i])
-		# ---
 
+		pi = gamma[0, :]
 		logP = np.sum(denom)
 
 	print(f"Done! diff = {abs(logP - oldP)}")
+	print(logP)
+	print(oldP)
 
 	return pi, A, B
 
