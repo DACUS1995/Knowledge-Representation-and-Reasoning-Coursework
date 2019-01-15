@@ -78,10 +78,9 @@ grid1 = Grid("Grid 1",
 			 [[1, 2, 3, 5], [2, 2, 1, 2], [3, 2, 1, 1], [0, 0, 0, 0]],  # elevation
 			 [[0, 3, 1, 2], [3, 1, 2, 0], [2, 2, 0, 0], [3, 0, 3, 1]])  # color
 
-grid2 = Grid("Grid 2",
-			 [[0, 0, 1, 1], [2, 1, 0, 2], [1, 0, 0, 2], [4, 4, 3, 3]],  # elevation
-			 [[0, 3, 1, 2], [3, 1, 2, 0], [2, 2, 0, 0], [3, 0, 3, 1]])  # color
-
+grid2 = Grid("Grid 3",
+			 [[2, 1, 2, 3], [1, 1, 2, 2], [1, 0, 1, 1], [2, 1, 1, 2]],  # elevation
+			 [[2, 3, 1, 0], [1, 3, 3, 1], [0, 2, 0, 2], [2, 1, 1, 2]])  # color
 grid3 = Grid("Grid 3",
 			 [[2, 1, 2, 3], [1, 1, 2, 2], [1, 0, 1, 1], [2, 1, 1, 2]],  # elevation
 			 [[2, 3, 1, 0], [1, 3, 3, 1], [0, 2, 0, 2], [2, 1, 1, 2]])  # color
@@ -455,6 +454,8 @@ def learn(grid, observations, num_possible_obs, eps):
 	A = np.zeros((N, N))
 	for i in range(N):
 		A[i, :] = np.random.dirichlet(np.ones(N))
+
+	print(A)
 	# emission probabilities
 	B = np.ones((N, M)) / M
 
@@ -466,12 +467,9 @@ def learn(grid, observations, num_possible_obs, eps):
 	logP = np.inf
 	it = 0
 
-	while it < 100: #abs(logP - oldP) >= eps:
-
-		# print("\n\n", pi,"\n",get_initial_distribution(grid), "\n")
-
+	while it < 5: #abs(logP - oldP) >= eps:
 		it += 1
-		print(f"Iter {it}, diff = {abs(logP - oldP)}")
+		print(f"Iteration {it}, difference = {abs(logP - oldP)}")
 
 		if logP is not np.inf:
 			oldP = logP
@@ -499,10 +497,12 @@ def learn(grid, observations, num_possible_obs, eps):
 				for j in range(N):
 					xi[t, i, j] = alpha[t, i] * A[j, i] * B[j, observations[t + 1]] * beta[t + 1, j] / denom[t]
 
+		print(xi)
+
 		# update A
 		for i in range(N):
 			for j in range(N):
-				A[j, i] = np.sum(xi[:, i, j]) / np.sum(gamma[:, i])
+				A[i, j] = np.sum(xi[:, i, j]) / np.sum(gamma[:, i])
 
 		# update B
 		for i in range(N):
@@ -512,7 +512,7 @@ def learn(grid, observations, num_possible_obs, eps):
 		pi = gamma[0, :]
 		logP = np.sum(denom)
 
-	print(f"Done! diff = {abs(logP - oldP)}")
+	print(f"Final results: {abs(logP - oldP)}")
 	print(logP)
 	print(oldP)
 
@@ -591,15 +591,23 @@ if ACTIVE_TESTS == True:
 
 	print("Viterbi looks right! Task 4 accomplished!")
 
-
-grid = GRIDS[0]
-observations, _ = get_sequence(grid, 100)
+grid4 = Grid("Grid 2",
+			 [[0, 1]],  # elevation
+			 [[0, 1]])  # color
+grid = grid4
+observations, _ = get_sequence(grid4, 100)
 
 pi, A, B = learn(grid, np.array(observations), num_possible_obs=len(COLORS), eps=1e-5)
 
 pi_true = get_initial_distribution(grid)
 A_true = get_transition_probabilities(grid)
 B_true = get_emission_probabilities(grid, num_possible_obs=len(COLORS))
+
+
+print("A")
+print(A)
+print("A_true")
+print(A_true)
 
 assert np.allclose(pi, pi_true)
 assert np.allclose(A, A_true)
